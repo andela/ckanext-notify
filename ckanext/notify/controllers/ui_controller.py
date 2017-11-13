@@ -302,7 +302,6 @@ class DataRequestsNotifyUI(base.BaseController):
                 'action_type': template,
             }
 
-
             email_subject = base.render_jinja2('notify/email/{}.txt'.format('subject'), extra_vars)
             email_body = base.render_jinja2('notify/email/{}.txt'.format(template), extra_vars)
 
