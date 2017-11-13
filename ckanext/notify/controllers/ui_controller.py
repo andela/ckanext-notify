@@ -7,9 +7,10 @@ import ckan.plugins as plugins
 import ckan.lib.helpers as helpers
 import ckanext.notify.constants as constants
 
+from ckan.common import request
+from pylons import config
 from ckan.common import config, request
 import ckan.lib.mailer as mailer
-
 
 log = logging.getLogger(__name__)
 toolkit = plugins.toolkit
@@ -93,7 +94,6 @@ class DataRequestsNotifyUI(base.BaseController):
         new_form = True
 
         try:
-            toolkit.check_access(constants.MANAGE_NOTIFICATIONS, context, {'organization_id': organization_id})
             self.post_slack_form(constants.DATAREQUEST_REGISTER_SLACK, context)
 
             c.group_dict = toolkit.get_action('organization_show')(context, {'id': organization_id})
@@ -116,7 +116,6 @@ class DataRequestsNotifyUI(base.BaseController):
         new_form = False
 
         try:
-            toolkit.check_access(constants.MANAGE_NOTIFICATIONS, context, data_dict)
             c.slack_data = toolkit.get_action(constants.SLACK_CHANNEL_SHOW)(context, data_dict)
 
             self.post_slack_form(constants.SLACK_CHANNEL_UPDATE, context, id=id)
@@ -190,7 +189,6 @@ class DataRequestsNotifyUI(base.BaseController):
 
         # Check access
         try:
-            toolkit.check_access(constants.MANAGE_NOTIFICATIONS, context, {'organization_id': organization_id})
             self.post_email_form(constants.DATAREQUEST_REGISTER_EMAIL, context)
 
             c.group_dict = toolkit.get_action('organization_show')(context, {'id': organization_id})
@@ -213,7 +211,6 @@ class DataRequestsNotifyUI(base.BaseController):
         new_form = False
 
         try:
-            toolkit.check_access(constants.MANAGE_NOTIFICATIONS, context, data_dict)
             c.email_data = toolkit.get_action(constants.EMAIL_CHANNEL_SHOW)(context, data_dict)
 
             self.post_email_form(constants.EMAIL_CHANNEL_UPDATE, context, id=id)
