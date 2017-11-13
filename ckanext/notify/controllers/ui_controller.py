@@ -31,7 +31,6 @@ class dotdict(dict):
     __setattr__ = dict.__setitem__
     __delattr__ = dict.__delitem__
 
-
 class DataRequestsNotifyUI(base.BaseController):
     def _get_context(self):
         return {'model': model, 'session': model.Session,
@@ -253,6 +252,7 @@ class DataRequestsNotifyUI(base.BaseController):
         DataRequest creation is sent a slack notification if an admin has
         added Slack as a notification channel.
         '''
+
         context = self._get_context()
         organization = result.get('organization', None)
         data_dict = {
@@ -268,6 +268,7 @@ class DataRequestsNotifyUI(base.BaseController):
                 'datarequest_title': result['title'],
                 'datarequest_description': result['description'],
             }
+
             slack_message = {'text': base.render_jinja2('notify/slack/{}.txt'.format(template), extra_vars)}
 
             for channel in channels:
@@ -300,6 +301,7 @@ class DataRequestsNotifyUI(base.BaseController):
                 'datarequest_description': result['description'],
                 'action_type': template,
             }
+
 
             email_subject = base.render_jinja2('notify/email/{}.txt'.format('subject'), extra_vars)
             email_body = base.render_jinja2('notify/email/{}.txt'.format(template), extra_vars)
