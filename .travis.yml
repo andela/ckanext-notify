@@ -1,11 +1,20 @@
-language: python
+# language: python
+# sudo: required
+# python:
+#   - '2.7'
+# env:
+#   matrix:
+#     - PGVERSION=9.1
+# install: "pip install -r requirements.txt"
+# script: nosetests
+# after_success:
+#   - coveralls
 sudo: required
-python:
-  - '2.7'
-env:
-  matrix:
-    - PGVERSION=9.1
-install: "pip install -r requirements.txt"
-script: nosetests
+language: python
+env: PGVERSION=9.2
+install:
+    - bash bin/travis-build.bash
+    - pip install coveralls
+script: sh bin/travis-run.sh
 after_success:
-  - coveralls
+    - coveralls
