@@ -15,7 +15,7 @@ echo "CKAN branch: $latest_ckan_release_branch"
 git checkout $latest_ckan_release_branch
 python setup.py develop
 pip install -r requirements.txt --allow-all-external
-pip install -r dev-requirements.txt --allow-all-external
+# pip install -r dev-requirements.txt --allow-all-external
 cd -
 
 echo "Creating the PostgreSQL user and database..."
@@ -34,6 +34,7 @@ cd -
 
 echo "Installing ckanext-notify and its requirements..."
 python setup.py develop
+# pip install -r dev-requirements.txt
 pip install -r dev-requirements.txt
 
 echo "Moving test.ini into a subdir..."
