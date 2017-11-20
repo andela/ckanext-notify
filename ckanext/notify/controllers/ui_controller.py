@@ -107,29 +107,28 @@ class DataRequestsNotifyUI(base.BaseController):
                 c.errors = e.error_dict
                 c.errors_summary = _get_errors_summary(c.errors)
 
-    def notification_preferences(self, id):
-        context = self._get_context()
-        c.group_dict = toolkit.get_action('organization_show')(context, {'id': id})
-        return toolkit.render('notify/preferences.html')
+    # def notification_preferences(self, id):
+    #     context = self._get_context()
+    #     c.group_dict = toolkit.get_action('organization_show')(context, {'id': id})
+    #     return toolkit.render('notify/preferences.html')
 
     def preference_form(self, organization_id):
         context = self._get_context()
 
         # Basic initialization
-        c.slack_data = {
+        c.preference_data = {
             'organization_id': organization_id
         }
         c.errors = {}
         c.errors_summary = {}
-        new_form = True
 
         try:
             toolkit.check_access(constants.MANAGE_NOTIFICATIONS, context, {'organization_id': organization_id})
-            # self.post_slack_form(constants.DATAREQUEST_REGISTER_SLACK, context)
+            self.post_notification_form(constants.NOTIFICATION_PREFERENCE_UPDATE, context)
 
             c.group_dict = toolkit.get_action('organization_show')(context, {'id': organization_id})
             required_vars = \
-                {'data': c.slack_data, 'errors': c.errors, 'errors_summary': c.errors_summary, 'new_form': new_form}
+                {'data': c.preference_data, 'errors': c.errors, 'errors_summary': c.errors_summary}
             return toolkit.render('notify/preferences.html', extra_vars=required_vars)
 
         except toolkit.NotAuthorized as e:

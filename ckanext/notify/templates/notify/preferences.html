@@ -3,9 +3,5 @@
 {% block primary_content_inner %}
 <h2 class="page-heading">{% trans %}Change Notification Preferences{% endtrans %}</h2>
 {% snippet "notify/snippets/preference_form.html", data=data, errors=errors, errors_summary=errors_summary %}
-<div class="form-actions">
-    {% block form_actions %}
-    <button class="btn btn-primary" type="submit" name="save">{{ _("Save") }}</button>
-    {% endblock %}
-</div>
+
 {% endblock %}
