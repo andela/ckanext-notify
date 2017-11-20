@@ -58,9 +58,14 @@ class NotifyPlugin(plugins.SingletonPlugin):
                     action='organization_channels', conditions=dict(method=['GET']), ckan_icon='bell')
 
         # Notification Preferences
-        map.connect('notification_preferences', '/organization/channels/preferences/{id}',
+        # map.connect('notification_preferences', '/organization/channels/preferences/{id}',
+        #             controller='ckanext.notify.controllers.ui_controller:DataRequestsNotifyUI',
+        #             action='notification_preferences', conditions=dict(method=['GET']))
+
+        # Notification Preferences Form
+        map.connect('preference_form', '/organization/channels/preferences/{organization_id}',
                     controller='ckanext.notify.controllers.ui_controller:DataRequestsNotifyUI',
-                    action='notification_preferences', conditions=dict(method=['GET']))
+                    action='preference_form', conditions=dict(method=['GET', 'POST']))
 
         # Add Channels
         map.connect('add_channel', '/organization/channels/add/{id}',
