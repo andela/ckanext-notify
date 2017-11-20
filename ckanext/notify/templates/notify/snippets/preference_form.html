@@ -1,0 +1,5 @@
+{% import 'macros/form.html' as form %}
+
+
+{{ form.radio('notifications', id='field-notification', options=['Both Channels', 'Email Only', 'Slack Only'],
+checked='Both Channels') }}
