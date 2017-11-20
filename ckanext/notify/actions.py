@@ -11,7 +11,6 @@ ValidationError = logic.ValidationError
 
 
 def _dictize_slack_details(slack_details):
-
     # Convert the slack details into a dict
     data_dict = {
         'id': slack_details.id,
@@ -30,7 +29,6 @@ def _undictize_slack_basic(slack_details, data_dict):
 
 
 def _dictize_email_details(email_details):
-
     # Convert the slack details into a dict
     data_dict = {
         'id': email_details.id,
@@ -44,6 +42,20 @@ def _dictize_email_details(email_details):
 def _undictize_email_basic(email_details, data_dict):
     email_details.email = data_dict['email']
     email_details.organization_id = data_dict['organization_id']
+
+
+def _dictize_notification_preference(preference):
+    # Convert the slack details into a dict
+    data_dict = {
+        'id': preference.id,
+        'preference': preference.preference,
+        'organization_id': preference.organization_id
+    }
+
+
+def _undictize_notification_preference_basic(preference, data_dict):
+    preference.preference = data_dict['preference']
+    preference.organization_id = data_dict['organization_id']
 
 
 def datarequest_register_slack(context, data_dict):
@@ -300,6 +312,26 @@ def datarequest_register_email(context, data_dict):
     return _dictize_email_details(email_details)
 
 
+def notification_preference_update(context, data_dict):
+    model = context['model']
+    session = context['session']
+
+    # Init the data base
+    db.init_db(model)
+
+    # Check access
+    toolkit.check_access(constants.MANAGE_NOTIFICATIONS, context, data_dict)
+
+    # Store the data
+    notification_preference = db.Org_Notification_Preference()
+    _undictize_notification_preference_basic(notification_preference, data_dict)
+
+    session.add(notification_preference)
+    session.commit()
+
+    return _dictize_notification_preference(notification_preference)
+
+
 def email_channel_show(context, data_dict):
     '''
     Action to retrieve the information of an email notification channel.
@@ -467,3 +499,5 @@ def email_channel_delete(context, data_dict):
     email_data = result[0]
     session.delete(email_data)
     session.commit()
+
+

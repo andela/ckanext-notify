@@ -31,6 +31,7 @@ class dotdict(dict):
     __setattr__ = dict.__setitem__
     __delattr__ = dict.__delitem__
 
+
 class DataRequestsNotifyUI(base.BaseController):
     def _get_context(self):
         return {'model': model, 'session': model.Session,
@@ -48,6 +49,12 @@ class DataRequestsNotifyUI(base.BaseController):
         context = self._get_context()
         c.group_dict = toolkit.get_action('organization_show')(context, {'id': id})
         return toolkit.render('notify/add_channel.html')
+
+    def post_notification_form(self, action, context, **kwargs):
+        if request.POST:
+            data_dict = dict()
+            data_dict['preference'] = request.POST.get('field-notification', '')
+            data_dict['organization_id'] = request.POST.get('organization_id', '')
 
     def post_slack_form(self, action, context, **kwargs):
         if request.POST:
@@ -77,6 +84,33 @@ class DataRequestsNotifyUI(base.BaseController):
                 }
                 c.errors = e.error_dict
                 c.errors_summary = _get_errors_summary(c.errors)
+
+    def post_notification_preferences(self, action, context, **kwargs):
+        if request.POST:
+            data_dict = dict()
+            data_dict['preference'] = request.POST.get('preference', '')
+            data_dict['organization_id'] = request.POST.get('organization_id', '')
+
+            try:
+                toolkit.get_action(action)(context, data_dict)
+                if action == constants.NOTIFICATION_PREFERENCE_UPDATE:
+                    helpers.flash_success(toolkit._('Notification preference updated'))
+                toolkit.redirect_to('organization_channels', id=data_dict['organization_id'])
+
+            except toolkit.ValidationError as e:
+                log.warning(e)
+                # Fill the fields that will display some information in the page
+                c.preference_data = {
+                    'organization_id': data_dict.get('organization_id', ''),
+                    'preference': data_dict.get('preference', ''),
+                }
+                c.errors = e.error_dict
+                c.errors_summary = _get_errors_summary(c.errors)
+
+    def notification_preferences(self, id):
+        context = self._get_context()
+        c.group_dict = toolkit.get_action('organization_show')(context, {'id': id})
+        return toolkit.render('notify/preferences.html')
 
     def slack_form(self, organization_id):
         context = self._get_context()
