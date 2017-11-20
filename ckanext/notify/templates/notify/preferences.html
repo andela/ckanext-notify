@@ -1,0 +1,13 @@
+{% extends "notify/base.html" %}
+{% import 'macros/form.html' as form %}
+
+{% block primary_content_inner %}
+	<h2 class="page-heading">{% trans %}Change Notification Preferences{% endtrans %}</h2>
+  {{ form.radio('notifications', id='field-notification', options=['Both Channels', 'Email Only', 'Slack Only'], checked='Both Channels') }}
+
+  <div class="form-actions">
+    {% block form_actions %}
+    <button class="btn btn-primary" type="submit" name="save">{{ _("Save") }}</button>
+    {% endblock %}
+  </div>
+{% endblock %}
