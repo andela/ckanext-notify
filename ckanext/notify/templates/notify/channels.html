@@ -7,10 +7,9 @@
         action='add_channel', id=c.group_dict.name, class_='btn btn-primary', icon='plus-sign-alt' %}
     </div>
     <div class="page_primary_action">
+        {% link_for _('Channel Preferences'), controller='ckanext.notify.controllers.ui_controller:DataRequestsNotifyUI',
+        action='preference_form', organization_id=c.group_dict.name, class_='btn btn-primary', icon='plus-sign-alt' %}
 
-        <a href="{{ h.url_for('preference_form', organization_id=c.group_dict.name) }}" class="btn btn-success">
-          {% trans %}Add Channel{% endtrans %}
-        </a>
     </div>
 </div>
 {% endblock %}

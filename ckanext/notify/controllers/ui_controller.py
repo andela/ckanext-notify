@@ -85,8 +85,10 @@ class DataRequestsNotifyUI(base.BaseController):
                 c.errors = e.error_dict
                 c.errors_summary = _get_errors_summary(c.errors)
 
-    def post_notification_preferences(self, action, context, **kwargs):
+    def post_preference_form(self, action, context, **kwargs):
         if request.POST:
+            import pdb; pdb.set_trace()
+            print(request.POST, 'INR')
             data_dict = dict()
             data_dict['preference'] = request.POST.get('preference', '')
             data_dict['organization_id'] = request.POST.get('organization_id', '')
@@ -124,7 +126,7 @@ class DataRequestsNotifyUI(base.BaseController):
 
         try:
             toolkit.check_access(constants.MANAGE_NOTIFICATIONS, context, {'organization_id': organization_id})
-            self.post_notification_form(constants.NOTIFICATION_PREFERENCE_UPDATE, context)
+            self.post_preference_form(constants.NOTIFICATION_PREFERENCE_UPDATE, context)
 
             c.group_dict = toolkit.get_action('organization_show')(context, {'id': organization_id})
             required_vars = \

@@ -1,11 +1,19 @@
-{% import 'macros/form.html' as form %}
-{% set preference = data.get('preference', '') %}
 
-{{ form.radio('notifications', id='field-notification', value=preference, options=['Both Channels', 'Email Only', 'Slack Only'],
-checked=preference) }}
 
-<div class="form-actions">
-    {% block form_actions %}
-        <button class="btn btn-primary" type="submit" name="save">{{ _("Save") }}</button>
-    {% endblock %}
-</div>
+{# form.radio('preference', id='field-notification',  value='Email Only', options=['Both Channels', 'Email Only', 'Slack Only'],
+checked='Both Channels') #}
+
+{# '%'import 'macros/form.html' as form'%'  #}
+
+<form action="" method="post">
+    <input type="radio" name="preference" id="Both Channels" value="Both Channels"> Both Channels <br>
+    <input type="radio" name="preference" id="Email Only" value="Email Only"> Email Only <br>
+    <input type="radio" name="preference" id="Slack Only" value="Slack Only"> Slack Only <br>
+
+    <input type="hidden" id="organization_id" name="organization_id" value="{{ data.get('organization_id', '') }}"/>
+    <div class="form-actions">
+        {% block form_actions %}
+            <button class="btn btn-primary" type="submit" name="save">{{ _("Save") }}</button>
+        {% endblock %}
+    </div>
+</form>
