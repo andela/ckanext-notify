@@ -26,3 +26,15 @@
     width: 50px;
     margin: 15px 5px 0 0;
 }
+
+.preference input {
+    margin-top: -14px;
+}
+
+.preference {
+    margin-top: 30px;
+    margin-bottom: 40px;
+}
+.preference label:after {
+    content: "";
+}

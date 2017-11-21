@@ -18,9 +18,17 @@ checked='Both Channels') #}
 {% endif %}
 
 <form action="" method="post">
-    <input type="radio" name="preference" id="Both Channels" value="Both Channels" {{ both_checked }}> Both Channels <br>
-    <input type="radio" name="preference" id="Email Only" value="Email Only" {{ email_checked }}> Email Only <br>
-    <input type="radio" name="preference" id="Slack Only" value="Slack Only" {{ slack_checked }}> Slack Only <br>
+    <div class="preference">
+        <label for="BothChannels">
+            <input type="radio" name="preference" id="BothChannels" value="Both Channels" {{ both_checked }}> Both Channels
+        </label><br>
+        <label for="EmailOnly">
+            <input type="radio" name="preference" id="EmailOnly" value="Email Only" {{ email_checked }}> Email Only
+        </label><br>
+        <label for="SlackOnly">
+            <input type="radio" name="preference" id="SlackOnly" value="Slack Only" {{ slack_checked }}> Slack Only <br>
+        </label>
+    </div>
 
     <input type="hidden" id="organization_id" name="organization_id" value="{{ data.get('organization_id', '') }}"/>
     <div class="form-actions">

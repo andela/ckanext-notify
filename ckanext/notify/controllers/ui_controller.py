@@ -33,6 +33,8 @@ class dotdict(dict):
 
 
 class DataRequestsNotifyUI(base.BaseController):
+    org_notification_preference = ''
+
     def _get_context(self):
         return {'model': model, 'session': model.Session,
                 'user': c.user, 'auth_user_obj': c.userobj}
@@ -109,10 +111,8 @@ class DataRequestsNotifyUI(base.BaseController):
                 c.errors = e.error_dict
                 c.errors_summary = _get_errors_summary(c.errors)
 
-    # def notification_preferences(self, id):
-    #     context = self._get_context()
-    #     c.group_dict = toolkit.get_action('organization_show')(context, {'id': id})
-    #     return toolkit.render('notify/preferences.html')
+    def preference_show(self):
+        pass
 
     def preference_form(self, organization_id):
         context = self._get_context()
@@ -124,6 +124,8 @@ class DataRequestsNotifyUI(base.BaseController):
             preference = preference_data['preference']
         else:
             preference = 'Both Channels'
+
+        DataRequestsNotifyUI.org_notification_preference = preference
         # Basic initialization
         c.preference_data = {
             'organization_id': organization_id,

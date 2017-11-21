@@ -270,14 +270,19 @@ def notification_preference_update(context, data_dict):
     # Check access
     toolkit.check_access(constants.MANAGE_NOTIFICATIONS, context, data_dict)
 
-    # Store the data
-    notification_preference = db.Org_Notification_Preference()
-    _undictize_notification_preference_basic(notification_preference, data_dict)
-
-    session.add(notification_preference)
-    session.commit()
-
-    return _dictize_notification_preference(notification_preference)
+    result = db.Org_Notification_Preference.get(organization_id=organization_id)
+    if not result:
+        notification_preference = db.Org_Notification_Preference()
+        _undictize_notification_preference_basic(notification_preference, data_dict)
+        session.add(notification_preference)
+        session.commit()
+        return _dictize_notification_preference(notification_preference)
+    else:
+        notification_preference = result[0]
+        _undictize_notification_preference_basic(notification_preference, data_dict)
+        session.add(notification_preference)
+        session.commit()
+        return _dictize_notification_preference(notification_preference)
 
 
 def slack_channel_delete(context, data_dict):
