@@ -35,6 +35,7 @@ class NotifyPlugin(plugins.SingletonPlugin):
             constants.EMAIL_CHANNEL_UPDATE: actions.email_channel_update,
             constants.EMAIL_CHANNEL_DELETE: actions.email_channel_delete,
             constants.NOTIFICATION_PREFERENCE_UPDATE: actions.notification_preference_update,
+            constants.NOTIFICATION_PREFERENCE_SHOW: actions.notification_preference_show
         }
 
         return additional_actions

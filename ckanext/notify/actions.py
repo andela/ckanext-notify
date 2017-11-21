@@ -52,6 +52,7 @@ def _dictize_notification_preference(preference):
         'organization_id': preference.organization_id
     }
 
+    return data_dict
 
 def _undictize_notification_preference_basic(preference, data_dict):
     preference.preference = data_dict['preference']
@@ -139,6 +140,30 @@ def slack_channels_show(context, data_dict):
         slack_channels = []
 
     return slack_channels
+
+
+def notification_preference_show(context, data_dict):
+    model = context['model']
+    organization_id = data_dict.get('organization_id')
+
+    if not organization_id:
+        raise toolkit.ValidationError(toolkit._('Organization ID has not been included'))
+
+    # Init the data base
+    db.init_db(model)
+
+    # Check access
+    toolkit.check_access(constants.MANAGE_NOTIFICATIONS, context, data_dict)
+
+    # Get notification preference
+    result = db.Org_Notification_Preference.get(organization_id=organization_id)
+    if result:
+        preference_data = result[0]
+        preference = _dictize_notification_preference(preference_data)
+    else:
+        preference = None
+
+    return preference
 
 
 def slack_channel_show(context, data_dict):
@@ -234,6 +259,27 @@ def slack_channel_update(context, data_dict):
     return _dictize_slack_details(slack_details)
 
 
+def notification_preference_update(context, data_dict):
+    model = context['model']
+    session = context['session']
+    organization_id = data_dict['organization_id']
+
+    # Init the data base
+    db.init_db(model)
+
+    # Check access
+    toolkit.check_access(constants.MANAGE_NOTIFICATIONS, context, data_dict)
+
+    # Store the data
+    notification_preference = db.Org_Notification_Preference()
+    _undictize_notification_preference_basic(notification_preference, data_dict)
+
+    session.add(notification_preference)
+    session.commit()
+
+    return _dictize_notification_preference(notification_preference)
+
+
 def slack_channel_delete(context, data_dict):
     '''
     Action to delete a slack channel. The function checks the access rights
@@ -310,26 +356,6 @@ def datarequest_register_email(context, data_dict):
     session.commit()
 
     return _dictize_email_details(email_details)
-
-
-def notification_preference_update(context, data_dict):
-    model = context['model']
-    session = context['session']
-
-    # Init the data base
-    db.init_db(model)
-
-    # Check access
-    toolkit.check_access(constants.MANAGE_NOTIFICATIONS, context, data_dict)
-
-    # Store the data
-    notification_preference = db.Org_Notification_Preference()
-    _undictize_notification_preference_basic(notification_preference, data_dict)
-
-    session.add(notification_preference)
-    session.commit()
-
-    return _dictize_notification_preference(notification_preference)
 
 
 def email_channel_show(context, data_dict):

@@ -1,14 +1,26 @@
-
-
 {# form.radio('preference', id='field-notification',  value='Email Only', options=['Both Channels', 'Email Only', 'Slack Only'],
 checked='Both Channels') #}
 
 {# '%'import 'macros/form.html' as form'%'  #}
 
+{% if data.get('preference', '') == 'Email Only' %}
+    {% set email_checked = 'checked' %}
+    {% set both_checked = '' %}
+    {% set slack_checked = '' %}
+{% elif  data.get('preference', '') == 'Slack Only'%}
+    {% set slack_checked = 'checked' %}
+    {% set both_checked = '' %}
+    {% set email_checked = '' %}
+{% elif  data.get('preference', '') == 'Both Channels'%}
+    {% set both_checked = 'checked' %}
+    {% set slack_checked = '' %}
+    {% set email_checked = '' %}
+{% endif %}
+
 <form action="" method="post">
-    <input type="radio" name="preference" id="Both Channels" value="Both Channels"> Both Channels <br>
-    <input type="radio" name="preference" id="Email Only" value="Email Only"> Email Only <br>
-    <input type="radio" name="preference" id="Slack Only" value="Slack Only"> Slack Only <br>
+    <input type="radio" name="preference" id="Both Channels" value="Both Channels" {{ both_checked }}> Both Channels <br>
+    <input type="radio" name="preference" id="Email Only" value="Email Only" {{ email_checked }}> Email Only <br>
+    <input type="radio" name="preference" id="Slack Only" value="Slack Only" {{ slack_checked }}> Slack Only <br>
 
     <input type="hidden" id="organization_id" name="organization_id" value="{{ data.get('organization_id', '') }}"/>
     <div class="form-actions">

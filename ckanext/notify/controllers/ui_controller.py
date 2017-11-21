@@ -87,8 +87,8 @@ class DataRequestsNotifyUI(base.BaseController):
 
     def post_preference_form(self, action, context, **kwargs):
         if request.POST:
-            import pdb; pdb.set_trace()
-            print(request.POST, 'INR')
+            # import pdb;pdb.set_trace()
+            # print(request.POST, 'INR')
             data_dict = dict()
             data_dict['preference'] = request.POST.get('preference', '')
             data_dict['organization_id'] = request.POST.get('organization_id', '')
@@ -116,10 +116,18 @@ class DataRequestsNotifyUI(base.BaseController):
 
     def preference_form(self, organization_id):
         context = self._get_context()
-
+        data_dict = {
+            'organization_id': organization_id
+        }
+        preference_data = toolkit.get_action(constants.NOTIFICATION_PREFERENCE_SHOW)(context, data_dict)
+        if preference_data is not None:
+            preference = preference_data['preference']
+        else:
+            preference = 'Both Channels'
         # Basic initialization
         c.preference_data = {
-            'organization_id': organization_id
+            'organization_id': organization_id,
+            'preference': preference
         }
         c.errors = {}
         c.errors_summary = {}
