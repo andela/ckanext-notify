@@ -34,6 +34,8 @@ class NotifyPlugin(plugins.SingletonPlugin):
             constants.EMAIL_CHANNEL_SHOW: actions.email_channel_show,
             constants.EMAIL_CHANNEL_UPDATE: actions.email_channel_update,
             constants.EMAIL_CHANNEL_DELETE: actions.email_channel_delete,
+            constants.NOTIFICATION_PREFERENCE_UPDATE: actions.notification_preference_update,
+            constants.NOTIFICATION_PREFERENCE_SHOW: actions.notification_preference_show
         }
 
         return additional_actions
@@ -55,6 +57,16 @@ class NotifyPlugin(plugins.SingletonPlugin):
         map.connect('organization_channels', '/organization/channels/{id}',
                     controller='ckanext.notify.controllers.ui_controller:DataRequestsNotifyUI',
                     action='organization_channels', conditions=dict(method=['GET']), ckan_icon='bell')
+
+        # Notification Preferences
+        # map.connect('notification_preferences', '/organization/channels/preferences/{id}',
+        #             controller='ckanext.notify.controllers.ui_controller:DataRequestsNotifyUI',
+        #             action='notification_preferences', conditions=dict(method=['GET']))
+
+        # Notification Preferences Form
+        map.connect('preference_form', '/organization/channels/preferences/{organization_id}',
+                    controller='ckanext.notify.controllers.ui_controller:DataRequestsNotifyUI',
+                    action='preference_form', conditions=dict(method=['GET', 'POST']))
 
         # Add Channels
         map.connect('add_channel', '/organization/channels/add/{id}',

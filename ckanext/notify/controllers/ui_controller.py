@@ -10,7 +10,6 @@ import ckanext.notify.constants as constants
 from ckan.common import config, request
 import ckan.lib.mailer as mailer
 
-
 log = logging.getLogger(__name__)
 toolkit = plugins.toolkit
 c = toolkit.c
@@ -26,14 +25,15 @@ def _get_errors_summary(errors):
 
 
 class dotdict(dict):
-
     """dot.notation access to dictionary attributes"""
 
     __getattr__ = dict.get
     __setattr__ = dict.__setitem__
     __delattr__ = dict.__delitem__
 
+
 class DataRequestsNotifyUI(base.BaseController):
+    org_notification_preference = ''
 
     def _get_context(self):
         return {'model': model, 'session': model.Session,
@@ -51,6 +51,12 @@ class DataRequestsNotifyUI(base.BaseController):
         context = self._get_context()
         c.group_dict = toolkit.get_action('organization_show')(context, {'id': id})
         return toolkit.render('notify/add_channel.html')
+
+    def post_notification_form(self, action, context, **kwargs):
+        if request.POST:
+            data_dict = dict()
+            data_dict['preference'] = request.POST.get('field-notification', '')
+            data_dict['organization_id'] = request.POST.get('organization_id', '')
 
     def post_slack_form(self, action, context, **kwargs):
         if request.POST:
@@ -219,6 +225,7 @@ class DataRequestsNotifyUI(base.BaseController):
             self.post_email_form(constants.EMAIL_CHANNEL_UPDATE, context, id=id)
 
             c.group_dict = toolkit.get_action('organization_show')(context, {'id': organization_id})
+
             required_vars = \
                 {'data': c.email_data, 'errors': c.errors, 'errors_summary': c.errors_summary, 'new_form': new_form}
             return toolkit.render('notify/register_email.html', extra_vars=required_vars)
@@ -265,11 +272,12 @@ class DataRequestsNotifyUI(base.BaseController):
         channels = toolkit.get_action(constants.SLACK_CHANNELS_SHOW)(context, data_dict)
         if channels:
             extra_vars = {
-                            'site_title': config.get('ckan.site_title'),
-                            'datarequest_url': result['datarequest_url'],
-                            'datarequest_title': result['title'],
-                            'datarequest_description': result['description'],
-                        }
+                'site_title': config.get('ckan.site_title'),
+                'datarequest_url': result['datarequest_url'],
+                'datarequest_title': result['title'],
+                'datarequest_description': result['description'],
+            }
+
             slack_message = {'text': base.render_jinja2('notify/slack/{}.txt'.format(template), extra_vars)}
 
             for channel in channels:
@@ -292,19 +300,75 @@ class DataRequestsNotifyUI(base.BaseController):
         }
 
         channels = toolkit.get_action(constants.EMAIL_CHANNELS_SHOW)(context, data_dict)
+
         if channels:
             extra_vars = {
-                            'site_url': config.get('ckan.site_url'),
-                            'site_title': config.get('ckan.site_title'),
-                            'datarequest_url': result['datarequest_url'],
-                            'datarequest_title': result['title'],
-                            'datarequest_description': result['description'],
-                            'action_type': template,
-                        }
+                'site_url': config.get('ckan.site_url'),
+                'site_title': config.get('ckan.site_title'),
+                'datarequest_url': result['datarequest_url'],
+                'datarequest_title': result['title'],
+                'datarequest_description': result['description'],
+                'action_type': template,
+            }
 
             email_subject = base.render_jinja2('notify/email/{}.txt'.format('subject'), extra_vars)
             email_body = base.render_jinja2('notify/email/{}.txt'.format(template), extra_vars)
 
             for channel in channels:
-                channel = dotdict(channel)              
+                channel = dotdict(channel)
                 mailer.mail_user(channel, email_subject, email_body)
+
+    def post_preference_form(self, action, context, **kwargs):
+        if request.POST:
+            data_dict = dict()
+            data_dict['preference'] = request.POST.get('preference', '')
+            data_dict['organization_id'] = request.POST.get('organization_id', '')
+
+            try:
+                toolkit.get_action(action)(context, data_dict)
+                if action == constants.NOTIFICATION_PREFERENCE_UPDATE:
+                    helpers.flash_success(toolkit._('Notification preference updated'))
+                toolkit.redirect_to('organization_channels', id=data_dict['organization_id'])
+
+            except toolkit.ValidationError as e:
+                log.warning(e)
+                # Fill the fields that will display some information in the page
+                c.preference_data = {
+                    'organization_id': data_dict.get('organization_id', ''),
+                    'preference': data_dict.get('preference', ''),
+                }
+                c.errors = e.error_dict
+                c.errors_summary = _get_errors_summary(c.errors)
+
+    def preference_form(self, organization_id):
+        context = self._get_context()
+        data_dict = {
+            'organization_id': organization_id
+        }
+        preference_data = toolkit.get_action(constants.NOTIFICATION_PREFERENCE_SHOW)(context, data_dict)
+        if preference_data is not None:
+            preference = preference_data['preference']
+        else:
+            preference = 'All Channels'
+
+        DataRequestsNotifyUI.org_notification_preference = preference
+        # Basic initialization
+        c.preference_data = {
+            'organization_id': organization_id,
+            'preference': preference
+        }
+        c.errors = {}
+        c.errors_summary = {}
+
+        try:
+            toolkit.check_access(constants.MANAGE_NOTIFICATIONS, context, {'organization_id': organization_id})
+            self.post_preference_form(constants.NOTIFICATION_PREFERENCE_UPDATE, context)
+
+            c.group_dict = toolkit.get_action('organization_show')(context, {'id': organization_id})
+            required_vars = \
+                {'data': c.preference_data, 'errors': c.errors, 'errors_summary': c.errors_summary}
+            return toolkit.render('notify/preferences.html', extra_vars=required_vars)
+
+        except toolkit.NotAuthorized as e:
+            log.warning(e)
+            toolkit.abort(403, toolkit._('Unauthorized to set notification preferences for this organization'))

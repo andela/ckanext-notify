@@ -4,6 +4,7 @@ import uuid
 Channel = None
 Org_Slack_Details = None
 Org_Email_Details = None
+Org_Notification_Preference = None
 
 
 def uuid4():
@@ -15,6 +16,7 @@ def init_db(model):
     global Channel
     global Org_Slack_Details
     global Org_Email_Details
+    global Org_Notification_Preference
 
     if Channel is None:
             class _Channel(model.DomainObject):
@@ -97,3 +99,25 @@ def init_db(model):
         org_email_details_table.create(checkfirst=True)
 
         model.meta.mapper(Org_Email_Details, org_email_details_table,)
+
+    if Org_Notification_Preference is None:
+            class _Org_Notification_Preference(model.DomainObject):
+
+                @classmethod
+                def get(cls, **kw):
+                    '''Finds all the instances required.'''
+                    query = model.Session.query(cls).autoflush(False)
+                    return query.filter_by(**kw).all()
+
+            Org_Notification_Preference = _Org_Notification_Preference
+
+            org_notification_preference_table = sa.Table('org_notification_preference', model.meta.metadata,
+                sa.Column('id', sa.types.UnicodeText, primary_key=True, default=uuid4),
+                sa.Column('organization_id', sa.types.UnicodeText, primary_key=False, default=None),
+                sa.Column('preference', sa.types.UnicodeText, primary_key=False, default=u'All Channels')
+            )
+
+            # Create the table only if it does not exist
+            org_notification_preference_table.create(checkfirst=True)
+
+            model.meta.mapper(Org_Notification_Preference, org_notification_preference_table,)

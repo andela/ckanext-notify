@@ -1,0 +1,7 @@
+{% extends "notify/base.html" %}
+
+{% block primary_content_inner %}
+<h2 class="page-heading">{% trans %}Change Notification Preferences{% endtrans %}</h2>
+{% snippet "notify/snippets/preference_form.html", data=data, errors=errors, errors_summary=errors_summary %}
+
+{% endblock %}
