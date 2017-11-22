@@ -45,7 +45,7 @@ def _undictize_email_basic(email_details, data_dict):
 
 
 def _dictize_notification_preference(preference):
-    # Convert the slack details into a dict
+    # Convert the notification details into a dict
     data_dict = {
         'id': preference.id,
         'preference': preference.preference,
@@ -142,30 +142,6 @@ def slack_channels_show(context, data_dict):
     return slack_channels
 
 
-def notification_preference_show(context, data_dict):
-    model = context['model']
-    organization_id = data_dict.get('organization_id')
-
-    if not organization_id:
-        raise toolkit.ValidationError(toolkit._('Organization ID has not been included'))
-
-    # Init the data base
-    db.init_db(model)
-
-    # Check access
-    toolkit.check_access(constants.MANAGE_NOTIFICATIONS, context, data_dict)
-
-    # Get notification preference
-    result = db.Org_Notification_Preference.get(organization_id=organization_id)
-    if result:
-        preference_data = result[0]
-        preference = _dictize_notification_preference(preference_data)
-    else:
-        preference = None
-
-    return preference
-
-
 def slack_channel_show(context, data_dict):
     '''
     Action to retrieve the information of a slack notification channel.
@@ -257,33 +233,6 @@ def slack_channel_update(context, data_dict):
     session.commit()
 
     return _dictize_slack_details(slack_details)
-
-
-def notification_preference_update(context, data_dict):
-    model = context['model']
-    session = context['session']
-    organization_id = data_dict['organization_id']
-
-    # Init the data base
-    db.init_db(model)
-
-    # Check access
-    toolkit.check_access(constants.MANAGE_NOTIFICATIONS, context, data_dict)
-
-    result = db.Org_Notification_Preference.get(organization_id=organization_id)
-    if not result:
-        notification_preference = db.Org_Notification_Preference()
-        _undictize_notification_preference_basic(notification_preference, data_dict)
-        session.add(notification_preference)
-        session.commit()
-        return _dictize_notification_preference(notification_preference)
-    else:
-        notification_preference = result[0]
-        _undictize_notification_preference_basic(notification_preference, data_dict)
-        session.add(notification_preference)
-        session.commit()
-        return _dictize_notification_preference(notification_preference)
-
 
 def slack_channel_delete(context, data_dict):
     '''
@@ -530,5 +479,87 @@ def email_channel_delete(context, data_dict):
     email_data = result[0]
     session.delete(email_data)
     session.commit()
+
+def notification_preference_show(context, data_dict):
+    '''
+    Action to retrieve the current notification preference for an organization.
+    The only required parameter is organization id. A NotFound
+    exception will be risen if the given id is not found.
+    Access rights will be checked before returning the information and an
+    exception will be risen (NotAuthorized) if the user is not authorized.
+    :param context: the context of the request
+    :type context: dict
+    :param data_dict: Contains the following
+    organization_id: The id of the organization
+    :type data_dict: dict
+    :returns: A dict with the organization preference data (id, organization_id, preference)
+    :rtype: dict
+    '''
+    model = context['model']
+    organization_id = data_dict.get('organization_id')
+
+    if not organization_id:
+        raise toolkit.ValidationError(toolkit._('Organization ID has not been included'))
+
+    # Init the data base
+    db.init_db(model)
+
+    # Check access
+    toolkit.check_access(constants.MANAGE_NOTIFICATIONS, context, data_dict)
+
+    # Get notification preference
+    result = db.Org_Notification_Preference.get(organization_id=organization_id)
+    if result:
+        preference_data = result[0]
+        preference = _dictize_notification_preference(preference_data)
+    else:
+        preference = None
+
+    return preference
+
+
+def notification_preference_update(context, data_dict):
+    '''
+    Action to update notification preference. The only required parameter is the id
+    of the channel. The function checks the access rights of the user before
+    updating the notification preference. If the user is not allowed a NotAuthorized
+    exception will be risen.
+    In addition, you should note that the parameters will be checked and an
+    exception (ValidationError) will be risen if some of these parameters are
+    invalid.
+    :param context: the context of the request
+    :type data_dict: dict
+    :param data_dict: Contains the following:
+    id: The ID of the slack channel to be updated
+    preference: The notification channel preference
+    organization_id: The ID of the organization whose channel is to be updated
+    :type data_dict: dict
+    :returns: A dict with the data request (id, preference,
+        organization_id)
+    :rtype: dict
+    '''
+    model = context['model']
+    session = context['session']
+    organization_id = data_dict['organization_id']
+
+    # Init the data base
+    db.init_db(model)
+
+    # Check access
+    toolkit.check_access(constants.MANAGE_NOTIFICATIONS, context, data_dict)
+
+    result = db.Org_Notification_Preference.get(organization_id=organization_id)
+    if not result:
+        notification_preference = db.Org_Notification_Preference()
+        _undictize_notification_preference_basic(notification_preference, data_dict)
+        session.add(notification_preference)
+        session.commit()
+        return _dictize_notification_preference(notification_preference)
+    else:
+        notification_preference = result[0]
+        _undictize_notification_preference_basic(notification_preference, data_dict)
+        session.add(notification_preference)
+        session.commit()
+        return _dictize_notification_preference(notification_preference)
 
 

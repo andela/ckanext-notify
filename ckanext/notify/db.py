@@ -114,7 +114,7 @@ def init_db(model):
             org_notification_preference_table = sa.Table('org_notification_preference', model.meta.metadata,
                 sa.Column('id', sa.types.UnicodeText, primary_key=True, default=uuid4),
                 sa.Column('organization_id', sa.types.UnicodeText, primary_key=False, default=None),
-                sa.Column('preference', sa.types.UnicodeText, primary_key=False, default=u'Both Channels')
+                sa.Column('preference', sa.types.UnicodeText, primary_key=False, default=u'All Channels')
             )
 
             # Create the table only if it does not exist

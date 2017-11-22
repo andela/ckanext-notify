@@ -87,66 +87,6 @@ class DataRequestsNotifyUI(base.BaseController):
                 c.errors = e.error_dict
                 c.errors_summary = _get_errors_summary(c.errors)
 
-    def post_preference_form(self, action, context, **kwargs):
-        if request.POST:
-            # import pdb;pdb.set_trace()
-            # print(request.POST, 'INR')
-            data_dict = dict()
-            data_dict['preference'] = request.POST.get('preference', '')
-            data_dict['organization_id'] = request.POST.get('organization_id', '')
-
-            try:
-                toolkit.get_action(action)(context, data_dict)
-                if action == constants.NOTIFICATION_PREFERENCE_UPDATE:
-                    helpers.flash_success(toolkit._('Notification preference updated'))
-                toolkit.redirect_to('organization_channels', id=data_dict['organization_id'])
-
-            except toolkit.ValidationError as e:
-                log.warning(e)
-                # Fill the fields that will display some information in the page
-                c.preference_data = {
-                    'organization_id': data_dict.get('organization_id', ''),
-                    'preference': data_dict.get('preference', ''),
-                }
-                c.errors = e.error_dict
-                c.errors_summary = _get_errors_summary(c.errors)
-
-    def preference_show(self):
-        pass
-
-    def preference_form(self, organization_id):
-        context = self._get_context()
-        data_dict = {
-            'organization_id': organization_id
-        }
-        preference_data = toolkit.get_action(constants.NOTIFICATION_PREFERENCE_SHOW)(context, data_dict)
-        if preference_data is not None:
-            preference = preference_data['preference']
-        else:
-            preference = 'Both Channels'
-
-        DataRequestsNotifyUI.org_notification_preference = preference
-        # Basic initialization
-        c.preference_data = {
-            'organization_id': organization_id,
-            'preference': preference
-        }
-        c.errors = {}
-        c.errors_summary = {}
-
-        try:
-            toolkit.check_access(constants.MANAGE_NOTIFICATIONS, context, {'organization_id': organization_id})
-            self.post_preference_form(constants.NOTIFICATION_PREFERENCE_UPDATE, context)
-
-            c.group_dict = toolkit.get_action('organization_show')(context, {'id': organization_id})
-            required_vars = \
-                {'data': c.preference_data, 'errors': c.errors, 'errors_summary': c.errors_summary}
-            return toolkit.render('notify/preferences.html', extra_vars=required_vars)
-
-        except toolkit.NotAuthorized as e:
-            log.warning(e)
-            toolkit.abort(403, toolkit._('Unauthorized to set notification preferences for this organization'))
-
     def slack_form(self, organization_id):
         context = self._get_context()
 
@@ -377,3 +317,58 @@ class DataRequestsNotifyUI(base.BaseController):
             for channel in channels:
                 channel = dotdict(channel)
                 mailer.mail_user(channel, email_subject, email_body)
+
+    def post_preference_form(self, action, context, **kwargs):
+        if request.POST:
+            data_dict = dict()
+            data_dict['preference'] = request.POST.get('preference', '')
+            data_dict['organization_id'] = request.POST.get('organization_id', '')
+
+            try:
+                toolkit.get_action(action)(context, data_dict)
+                if action == constants.NOTIFICATION_PREFERENCE_UPDATE:
+                    helpers.flash_success(toolkit._('Notification preference updated'))
+                toolkit.redirect_to('organization_channels', id=data_dict['organization_id'])
+
+            except toolkit.ValidationError as e:
+                log.warning(e)
+                # Fill the fields that will display some information in the page
+                c.preference_data = {
+                    'organization_id': data_dict.get('organization_id', ''),
+                    'preference': data_dict.get('preference', ''),
+                }
+                c.errors = e.error_dict
+                c.errors_summary = _get_errors_summary(c.errors)
+
+    def preference_form(self, organization_id):
+        context = self._get_context()
+        data_dict = {
+            'organization_id': organization_id
+        }
+        preference_data = toolkit.get_action(constants.NOTIFICATION_PREFERENCE_SHOW)(context, data_dict)
+        if preference_data is not None:
+            preference = preference_data['preference']
+        else:
+            preference = 'All Channels'
+
+        DataRequestsNotifyUI.org_notification_preference = preference
+        # Basic initialization
+        c.preference_data = {
+            'organization_id': organization_id,
+            'preference': preference
+        }
+        c.errors = {}
+        c.errors_summary = {}
+
+        try:
+            toolkit.check_access(constants.MANAGE_NOTIFICATIONS, context, {'organization_id': organization_id})
+            self.post_preference_form(constants.NOTIFICATION_PREFERENCE_UPDATE, context)
+
+            c.group_dict = toolkit.get_action('organization_show')(context, {'id': organization_id})
+            required_vars = \
+                {'data': c.preference_data, 'errors': c.errors, 'errors_summary': c.errors_summary}
+            return toolkit.render('notify/preferences.html', extra_vars=required_vars)
+
+        except toolkit.NotAuthorized as e:
+            log.warning(e)
+            toolkit.abort(403, toolkit._('Unauthorized to set notification preferences for this organization'))
