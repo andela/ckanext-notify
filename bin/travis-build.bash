@@ -1,3 +1,4 @@
+#!/bin/bash
 set -e
 
 echo "This is travis-build.bash..."
@@ -14,6 +15,7 @@ echo "CKAN branch: $latest_ckan_release_branch"
 git checkout $latest_ckan_release_branch
 python setup.py develop
 pip install -r requirements.txt --allow-all-external
+# pip install -r dev-requirements.txt --allow-all-external
 cd -
 
 echo "Creating the PostgreSQL user and database..."
